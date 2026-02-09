@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dark Inferno</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Rajdhani:wght@300;500;600;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- 1. THEME VARIABLES --- */
+        :root {
+            --bg-deep: #050507;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --accent-purple: #bc13fe;
+            --accent-blue: #4facfe;
+            --accent-green: #00ff88;
+            --gradient-primary: linear-gradient(135deg, #bc13fe 0%, #4facfe 100%);
+            --text-main: #ffffff;
+            --text-silver: #c0c0c0;
+            --max-width: 1200px;
+        }
+
+        /* --- 2. BASE --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding-bottom: 100px;
+        }
+
+        h1, h2, h3, .tech-font { font-family: 'Rajdhani', sans-serif; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* --- 3. BACKGROUND --- */
+        .ambient-glow { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+        .glow-blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.25; animation: float 10s infinite ease-in-out alternate; }
+        .blob-1 { top: -10%; left: -20%; width: 400px; height: 400px; background: var(--accent-purple); }
+        .blob-2 { bottom: 10%; right: -20%; width: 300px; height: 300px; background: var(--accent-blue); animation-delay: -5s; }
+        @keyframes float { 0% { transform: translate(0, 0); } 100% { transform: translate(20px, 20px); } }
+
+        /* --- 4. LAYOUT SYSTEM --- */
+        .container {
+            width: 100%;
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .dashboard-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* --- 5. HEADER --- */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 0 20px 0; }
+        .profile-wrapper { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .avatar { width: 45px; height: 45px; border-radius: 50%; background: var(--gradient-primary); padding: 2px; }
+        .avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid var(--bg-deep); }
+        .user-info h2 { font-size: 18px; font-weight: 700; background: linear-gradient(to bottom, #ffffff, #a0a0a0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .user-info p { font-size: 11px; color: var(--accent-blue); font-weight: 600; }
+        .header-btn { width: 40px; height: 40px; border-radius: 12px; background: var(--glass-bg); border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center; color: var(--text-silver); font-size: 18px; transition: 0.3s; position: relative; cursor: pointer; }
+        .header-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.08); }
+        .notification-badge { position: absolute; top: -5px; right: -5px; width: 8px; height: 8px; background: #ff4757; border-radius: 50%; border: 2px solid rgba(15, 15, 20, 0.85); animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        /* --- 6. GLASS UTILITY --- */
+        .glass-panel {
+            background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border); border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+
+        /* --- 7. KOLOM KIRI (PANEL STATUS & NEWS) --- */
+        
+        /* HERO CARD DENGAN ANIMASI "NYALA BERJALAN" */
+        .hero-card { 
+            background: linear-gradient(135deg, rgba(188, 19, 254, 0.15), rgba(79, 172, 254, 0.1)); 
+            border: 1px solid rgba(255,255,255,0.15); 
+            padding: 25px; 
+            position: relative; 
+            overflow: hidden; 
+            margin-bottom: 25px; 
+        }
+
+        .hero-card::before { 
+            content: ''; 
+            position: absolute; 
+            top: 0; left: 0; 
+            width: 100%; height: 3px; 
+            background: rgba(188, 19, 254, 0.3);
+            z-index: 1;
+        }
+
+        .hero-card::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 120%; height: 3px;
+            background: linear-gradient(90deg, transparent, #fff, transparent);
+            transform: translateX(-100%);
+            animation: scanline 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            z-index: 2;
+        }
+
+        @keyframes scanline {
+            0% { transform: translateX(-100%); }
+            50% { transform: translateX(100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .hero-content { position: relative; z-index: 3; display: flex; flex-direction: column; gap: 15px; }
+        .status-badge { align-self: flex-start; padding: 5px 12px; border-radius: 30px; background: rgba(79, 172, 254, 0.2); border: 1px solid var(--accent-blue); color: #fff; font-size: 10px; font-weight: 600; letter-spacing: 1px; box-shadow: 0 0 10px rgba(79, 172, 254, 0.3); transition: all 0.5s ease; }
+        .balance-section .amount { font-size: 32px; font-weight: 700; font-family: 'Rajdhani', sans-serif; text-shadow: 0 0 15px rgba(188, 19, 254, 0.5); }
+        .hero-stats { display: flex; gap: 15px; margin-top: 10px; }
+        .h-stat { flex: 1; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; }
+        .h-stat span { font-size: 10px; color: var(--text-silver); }
+        .h-stat strong { font-size: 16px; color: var(--accent-blue); font-family: 'Rajdhani'; }
+
+        /* DEKORASI JUDUL DENGAN INDIKATOR */
+        .section-header { 
+            margin: 20px 0 15px 0; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+        }
+        
+        .section-indicator {
+            width: 4px;
+            height: 24px;
+            background: var(--gradient-primary);
+            border-radius: 4px;
+            box-shadow: 0 0 15px var(--accent-purple);
+            position: relative;
+        }
+        
+        .section-indicator::after {
+            content: '';
+            position: absolute;
+            left: 8px; top: 50%; transform: translateY(-50%);
+            width: 4px; height: 4px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+        }
+
+        .section-title { 
+            font-size: 18px; 
+            color: #fff; 
+            font-weight: 700; 
+            letter-spacing: 1px; 
+            font-family: 'Rajdhani'; 
+            text-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        /* CAROUSEL LATEST NEWS (BISA DIGESER-GESER) */
+        .news-wrapper {
+            display: flex;
+            overflow-x: auto;
+            gap: 15px;
+            padding-bottom: 5px;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            margin-bottom: 15px;
+        }
+        
+        .news-wrapper::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .news-card {
+            flex: 0 0 85%;
+            height: 180px;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            scroll-snap-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: 0.3s;
+            background: #000;
+            cursor: pointer;
+        }
+        
+        .news-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.7;
+            transition: 0.5s;
+        }
+        
+        .news-card:hover img {
+            opacity: 0.9;
+            transform: scale(1.05);
+        }
+        
+        .card-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(to top, #000, transparent);
+        }
+        
+        .card-title {
+            font-family: 'Orbitron';
+            font-weight: 800;
+            font-size: 18px;
+            margin-bottom: 4px;
+            color: #fff;
+            text-shadow: 0 2px 4px #000;
+            letter-spacing: 1px;
+        }
+        
+        .card-sub {
+            font-family: 'Rajdhani';
+            font-size: 12px;
+            color: #aaa;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        /* CAROUSEL INDICATORS (DOTS) */
+        .carousel-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 25px;
+        }
+        
+        .carousel-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .carousel-dot.active {
+            background: var(--accent-purple);
+            width: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px var(--accent-purple);
+        }
+
+        /* ACCOUNT INFO GRID */
+        .account-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(160deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 110px;
+            position: relative;
+            overflow: hidden;
+            transition: 0.3s;
+        }
+        
+        .stat-card:hover {
+            border-color: rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.05);
+        }
+
+        .stat-card.main {
+            grid-column: span 2;
+            background: linear-gradient(135deg, rgba(188, 19, 254, 0.15), rgba(0,0,0,0));
+            border-color: rgba(188, 19, 254, 0.3);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        
+        .stat-icon {
+            font-size: 18px;
+            color: rgba(255,255,255,0.4);
+            background: rgba(255,255,255,0.05);
+            padding: 8px;
+            border-radius: 8px;
+        }
+        
+        .stat-card.main .stat-icon {
+            color: var(--accent-purple);
+            background: rgba(188, 19, 254, 0.1);
+        }
+
+        .stat-content {
+            margin-top: 10px;
+        }
+        
+        .stat-label {
+            font-size: 10px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: block;
+            margin-bottom: 4px;
+        }
+        
+        .stat-value {
+            font-family: 'Rajdhani';
+            font-size: 22px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1;
+        }
+        
+        .stat-bar {
+            height: 3px;
+            width: 100%;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+        
+        .stat-bar-fill {
+            height: 100%;
+            border-radius: 2px;
+        }
+
+        /* KEY INFO BOX */
+        .key-info-box {
+            background: linear-gradient(135deg, rgba(188, 19, 254, 0.1), rgba(79, 172, 254, 0.05));
+            border: 1px solid rgba(188, 19, 254, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            display: none;
+        }
+        
+        .key-info-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue));
+        }
+        
+        .key-label {
+            font-size: 11px;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .key-value {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: var(--accent-green);
+            background: rgba(0, 0, 0, 0.3);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            word-break: break-all;
+            margin-top: 5px;
+            font-weight: 600;
+        }
+
+        .key-note {
+            font-size: 10px;
+            color: #888;
+            margin-top: 10px;
+            text-align: center;
+            font-style: italic;
+        }
+
+        /* --- 8. NAV DOCK --- */
+        .nav-container {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            z-index: 100;
+            pointer-events: none;
+        }
+        
+        .floating-nav {
+            pointer-events: auto;
+            background: rgba(15, 15, 20, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.15);
+            padding: 12px 30px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 35px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        
+        .nav-link {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #666;
+            transition: 0.3s;
+            position: relative;
+        }
+        
+        .nav-link i {
+            font-size: 20px;
+            margin-bottom: 2px;
+            transition: 0.3s;
+        }
+        
+        .nav-link.active {
+            color: #fff;
+        }
+        
+        .nav-link.active i {
+            transform: translateY(-5px);
+            text-shadow: 0 0 15px var(--accent-purple);
+        }
+        
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            width: 4px;
+            height: 4px;
+            background: var(--accent-purple);
+            border-radius: 50%;
+            box-shadow: 0 0 5px var(--accent-purple);
+        }
+
+        /* --- 9. SECRET NOTIFICATION --- */
+        .secret-notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: rgba(0,0,0,0.95);
+            border: 2px solid var(--accent-purple);
+            border-radius: 20px;
+            padding: 30px;
+            z-index: 1000;
+            color: white;
+            text-align: center;
+            font-family: 'Orbitron';
+            box-shadow: 0 0 50px rgba(188, 19, 254, 0.5);
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            max-width: 300px;
+            width: 80%;
+        }
+        
+        .secret-notification.show {
+            transform: translate(-50%, -50%) scale(1);
+        }
+        
+        .secret-icon {
+            font-size: 40px;
+            color: var(--accent-purple);
+            margin-bottom: 15px;
+            text-shadow: 0 0 20px var(--accent-purple);
+        }
+        
+        .secret-title {
+            color: var(--accent-purple);
+            font-size: 22px;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+        
+        .secret-message {
+            font-size: 12px;
+            color: #ccc;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+        
+        .secret-close {
+            background: var(--accent-purple);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 10px;
+            font-family: 'Rajdhani';
+            font-weight: 600;
+            cursor: pointer;
+            letter-spacing: 1px;
+        }
+
+        /* --- 10. DESKTOP RESPONSIVE QUERY --- */
+        @media (min-width: 1024px) {
+            .dashboard-grid {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            /* Di desktop, ubah carousel jadi grid tetap tapi tetap ada di atas */
+            .news-wrapper {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                overflow: visible;
+                gap: 20px;
+                padding-bottom: 0;
+            }
+            
+            .news-card {
+                flex: none;
+                width: 100%;
+                height: 200px;
+            }
+            
+            /* Sembunyikan dots carousel di desktop */
+            .carousel-indicators {
+                display: none;
+            }
+            
+            /* Account grid di desktop sedikit lebih besar */
+            .account-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 15px;
+            }
+            
+            .stat-card.main {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-glow">
+        <div class="glow-blob blob-1"></div>
+        <div class="glow-blob blob-2"></div>
+    </div>
+
+    <div class="container">
+        
+        <!-- HEADER -->
+        <header class="header">
+            <div class="profile-wrapper" id="profile">
+                <div class="avatar">
+                    <img src="https://files.catbox.moe/vbvctl.jpg" alt="User">
+                </div>
+                <div class="user-info">
+                    <p>WELCOME</p>
+                    <h2 id="usernameDisplay">Dark Inferno</h2>
+                </div>
+            </div>
+            <button class="header-btn" id="notificationBtn">
+                <i class="fa-regular fa-bell"></i>
+                <div class="notification-badge"></div>
+            </button>
+        </header>
+
+        <!-- DASHBOARD LAYOUT -->
+        <div class="dashboard-grid">
+            
+            <!-- KOLOM UTAMA (SEMUA DI SINI) -->
+            <div class="main-panel">
+                <!-- HERO CARD -->
+                <div class="hero-card glass-panel">
+                    <div class="hero-content">
+                        <div class="status-badge" id="statusBadge">
+                            <i class="fa-solid fa-signal" style="margin-right:5px;"></i> SYSTEM ONLINE
+                        </div>
+                        <div class="balance-section">
+                            <h3 style="font-size:12px; color:#aaa; margin-bottom:5px;">CURRENT SESSION</h3>
+                            <div class="amount">V1.0</div>
+                        </div>
+                        <div class="hero-stats">
+                            <div class="h-stat"><span>USERS</span><strong id="userCount">0</strong></div>
+                            <div class="h-stat"><span>PING</span><strong id="pingValue" style="color:var(--accent-purple);">24ms</strong></div>
+                            <div class="h-stat"><span>EXP</span><strong id="expDays" style="color:#fff;">0D</strong></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LATEST NEWS CAROUSEL (BISA DIGESER-GESER) -->
+                <div class="section-header">
+                    <div class="section-inferno"></div>
+                    <div class="section-title">LATEST NEWS</div>
+                </div>
+                
+                <div class="news-wrapper" id="carousel">
+                    <!-- Card 1 -->
+                    <div class="news-card">
+                        <img src="https://files.catbox.moe/1qd1l3.jpg" alt="News 1">
+                        <div class="card-overlay">
+                            <div class="card-title">Dark Inferno</div>
+                            <div class="card-sub">© Copyright by Ngatstecu</div>
+                        </div>
+                    </div>
+                    <!-- Card 2 -->
+                    <div class="news-card">
+                        <img src="https://files.catbox.moe/pwr0ws.jpg" alt="News 2">
+                        <div class="card-overlay">
+                            <div class="card-title">First version</div>
+                            <div class="card-sub">PATCH V1.0 RELEASED</div>
+                        </div>
+                    </div>
+                    <!-- Card 3 -->
+                    <div class="news-card">
+                        <img src="https://files.catbox.moe/nf23zz.jpg" alt="News 3">
+                        <div class="card-overlay">
+                            <div class="card-title">Security Level</div>
+                            <div class="card-sub">MAXIMUM PROTECTION</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Carousel Indicators (Mobile Only) -->
+                <div class="carousel-indicators" id="carouselIndicators">
+                    <div class="carousel-dot active" data-index="0"></div>
+                    <div class="carousel-dot" data-index="1"></div>
+                    <div class="carousel-dot" data-index="2"></div>
+                </div>
+
+                <!-- ACCOUNT INFO -->
+                <div class="section-header">
+                    <div class="section-inferno"></div>
+                    <div class="section-title">ACCOUNT INFO</div>
+                </div>
+                
+                <div class="account-grid">
+                    <!-- Main Stat (Gradient BG) -->
+                    <div class="stat-card main">
+                        <div class="stat-header">
+                            <span class="stat-label">Access Level</span>
+                            <div class="stat-icon"><i class="fa-solid fa-crown" id="levelIcon"></i></div>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="accessLevel">LOADING...</div>
+                            <div class="stat-bar"><div class="stat-bar-fill" id="levelProgress" style="width:30%; background:var(--accent-purple);"></div></div>
+                        </div>
+                    </div>
+
+                    <!-- Stat 2 -->
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-label">Expires</span>
+                            <div class="stat-icon"><i class="fa-solid fa-calendar-check"></i></div>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="expiredDate">LOADING...</div>
+                            <div class="stat-bar"><div class="stat-bar-fill" style="width:80%; background:#fff;"></div></div>
+                        </div>
+                    </div>
+
+                    <!-- Stat 3 -->
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-label">Protection</span>
+                            <div class="stat-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" style="color:var(--accent-green);">ACTIVE</div>
+                            <div class="stat-bar"><div class="stat-bar-fill" style="width:100%; background:var(--accent-green);"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KEY INFO BOX -->
+                <div class="key-info-box" id="keyInfoBox">
+                    <div class="key-label">
+                        <i class="fa-solid fa-key"></i>
+                        YOUR ACCESS KEY
+                    </div>
+                    <div class="key-value" id="userKey">LOADING...</div>
+                    <div class="key-note">
+                        Keep this key secure. Do not share with anyone.
+                    </div>
+                </div>
+            </div>
+            
+        </div> <!-- End Dashboard Grid -->
+
+    </div>
+
+    <!-- FLOATING NAV -->
+    <div class="nav-container">
+        <nav class="floating-nav">
+            <a href="/dashboard" class="nav-link active" data-page="home">
+                <i class="fa-solid fa-house"></i>
+                <span style="font-size: 8px;">HOME</span>
+            </a>
+            <a href="/execution" class="nav-link" data-page="explore">
+                <i class="fa-solid fa-bug"></i>
+                <span style="font-size: 8px;">BUG TOOL</span>
+            </a>
+            <a href="/logout" class="nav-link" data-page="settings">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span style="font-size: 8px;">LOGOUT</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- SECRET NOTIFICATION -->
+    <div class="secret-notification" id="secretNotification">
+        <div class="secret-icon">
+            <i class="fa-solid fa-star"></i>
+        </div>
+        <div class="secret-title">DEVELOPER MODE</div>
+        <div class="secret-message">
+            Secret features unlocked!<br>
+            Easter egg activated. Enjoy premium access.
+        </div>
+        <button class="secret-close" id="secretClose">CLOSE</button>
+    </div>
+
+    <script>
+        // === VARIABLES ===
+        const carousel = document.getElementById('carousel');
+        const dots = document.querySelectorAll('.carousel-dot');
+        const notificationBadge = document.querySelector('.notification-badge');
+        const statusBadge = document.getElementById('statusBadge');
+        const pingElement = document.getElementById('pingValue');
+        const userCountElement = document.getElementById('userCount');
+        const secretNotification = document.getElementById('secretNotification');
+        const profileElement = document.getElementById('profile');
+        const keyInfoBox = document.getElementById('keyInfoBox');
+
+        // === FUNGSI LOAD USER DATA ===
+        async function loadUserData() {
+            try {
+                console.log('Mengambil data user...');
+                const response = await fetch('/api/user-data', {
+                    method: 'GET',
+                    credentials: 'same-origin'
+                });
+                
+                if (response.status === 401) {
+                    window.location.href = '/login';
+                    return;
+                }
+                
+                if (response.status === 404) {
+                    window.location.href = '/login?msg=' + encodeURIComponent('User tidak ditemukan');
+                    return;
+                }
+                
+                const userData = await response.json();
+                console.log('Data user diterima:', userData);
+                
+                // Update username
+                const usernameDisplay = document.getElementById('usernameDisplay');
+                if (usernameDisplay) {
+                    usernameDisplay.textContent = userData.username.toUpperCase();
+                }
+                
+                // Update sisa hari
+                const remainingDays = userData.remainingDays;
+                const userCount = document.getElementById('userCount');
+                const expDays = document.getElementById('expDays');
+                
+                if (userCount) userCount.textContent = remainingDays;
+                if (expDays) expDays.textContent = remainingDays + 'D';
+                
+                // Update access level
+                const accessLevel = document.getElementById('accessLevel');
+                const levelIcon = document.getElementById('levelIcon');
+                const levelProgress = document.getElementById('levelProgress');
+                
+                if (accessLevel) {
+                    accessLevel.textContent = userData.accessLevel;
+                    accessLevel.style.color = userData.levelColor;
+                }
+                
+                if (levelIcon) {
+                    levelIcon.className = userData.levelIcon;
+                }
+                
+                if (levelProgress) {
+                    let width = 30;
+                    if (remainingDays > 30) width = 100;
+                    else if (remainingDays > 7) width = 60;
+                    
+                    levelProgress.style.width = width + '%';
+                    levelProgress.style.background = userData.levelColor;
+                }
+                
+                // Update expired date
+                const expiredDate = document.getElementById('expiredDate');
+                if (expiredDate) {
+                    expiredDate.textContent = userData.formattedTime;
+                }
+                
+                // Update user key
+                const userKey = document.getElementById('userKey');
+                if (userKey && userData.key) {
+                    userKey.textContent = userData.key;
+                    
+                    // Tampilkan key info box
+                    if (keyInfoBox) {
+                        keyInfoBox.style.display = 'block';
+                    }
+                }
+                
+                console.log('Data user berhasil di-update');
+                
+            } catch (error) {
+                console.error('Error loading user data:', error);
+                
+                const accessLevel = document.getElementById('accessLevel');
+                if (accessLevel) {
+                    accessLevel.textContent = 'ERROR LOADING';
+                    accessLevel.style.color = '#ff4757';
+                }
+                
+                const expiredDate = document.getElementById('expiredDate');
+                if (expiredDate) {
+                    expiredDate.textContent = 'ERROR';
+                }
+                
+                setTimeout(() => {
+                    window.location.href = '/login?msg=' + encodeURIComponent('Session expired, login ulang');
+                }, 2000);
+            }
+        }
+
+        // === CAROUSEL LOGIC (BISA DIGESER-GESER) ===
+        function setupCarousel() {
+            if (!carousel) return;
+            
+            // Event listener untuk scroll carousel
+            carousel.addEventListener('scroll', () => {
+                const scrollPosition = carousel.scrollLeft;
+                const cardWidth = carousel.offsetWidth * 0.85;
+                const index = Math.round(scrollPosition / cardWidth);
+                
+                dots.forEach((dot, i) => {
+                    if (i === index) {
+                        dot.classList.add('active');
+                    } else {
+                        dot.classList.remove('active');
+                    }
+                });
+            });
+
+            // Event listener untuk dots (klik untuk pindah slide)
+            dots.forEach(dot => {
+                dot.addEventListener('click', () => {
+                    const index = parseInt(dot.getAttribute('data-index'));
+                    const cardWidth = carousel.offsetWidth * 0.85 + 15;
+                    carousel.scrollTo({
+                        left: index * cardWidth,
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        }
+
+        // === NAVIGATION HANDLERS ===
+        function setupNavigation() {
+            // Navigation links
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    if (this.getAttribute('href') === '/logout') {
+                        return;
+                    }
+                    e.preventDefault();
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                    window.location.href = this.getAttribute('href');
+                });
+            });
+        }
+
+        // === REAL-TIME STATUS UPDATES ===
+        function updateConnectionStatus() {
+            if (!pingElement || !statusBadge) return;
+            
+            const newPing = Math.floor(Math.random() * 20) + 10;
+            pingElement.textContent = `${newPing}ms`;
+            
+            if (newPing < 20) {
+                statusBadge.innerHTML = '<i class="fa-solid fa-bolt" style="margin-right:5px;"></i> SYSTEM OPTIMAL';
+                statusBadge.style.borderColor = 'var(--accent-green)';
+            } else {
+                statusBadge.innerHTML = '<i class="fa-solid fa-signal" style="margin-right:5px;"></i> SYSTEM STABLE';
+                statusBadge.style.borderColor = 'var(--accent-blue)';
+            }
+        }
+
+        // === OTHER INTERACTIONS ===
+        function setupInteractions() {
+            // Secret Feature (double tap profile)
+            let lastTap = 0;
+            if (profileElement) {
+                profileElement.addEventListener('click', (e) => {
+                    const currentTime = new Date().getTime();
+                    const tapLength = currentTime - lastTap;
+                    if (tapLength < 500 && tapLength > 0) {
+                        secretNotification.classList.add('show');
+                        e.preventDefault();
+                    }
+                    lastTap = currentTime;
+                });
+            }
+
+            // Close secret notification
+            const secretCloseBtn = document.getElementById('secretClose');
+            if (secretCloseBtn) {
+                secretCloseBtn.addEventListener('click', () => {
+                    secretNotification.classList.remove('show');
+                });
+            }
+
+            // Notification badge animation
+            if (notificationBadge) {
+                setInterval(() => {
+                    if (notificationBadge.style.animationPlayState === 'paused') {
+                        notificationBadge.style.animationPlayState = 'running';
+                    } else {
+                        notificationBadge.style.animationPlayState = 'paused';
+                    }
+                }, 3000);
+            }
+
+            // News card click effect
+            const newsCards = document.querySelectorAll('.news-card');
+            newsCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    this.style.transform = 'scale(0.98)';
+                    setTimeout(() => this.style.transform = '', 150);
+                });
+            });
+        }
+
+        // === INITIALIZATION ===
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Dashboard loaded, initializing...');
+            
+            setupCarousel();
+            setupNavigation();
+            setupInteractions();
+            loadUserData();
+            
+            setInterval(updateConnectionStatus, 5000);
+            
+            // Set active nav based on current page
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+            
+            console.log('Dashboard initialization complete');
+        });
+
+        // Auto-update remaining days setiap menit
+        setInterval(() => {
+            const expDays = document.getElementById('expDays');
+            const userCount = document.getElementById('userCount');
+            if (expDays && userCount) {
+                const currentText = expDays.textContent;
+                const currentDays = parseInt(currentText) || 0;
+                if (currentDays > 0) {
+                    expDays.textContent = `${currentDays}D`;
+                    userCount.textContent = currentDays;
+                }
+            }
+        }, 60000);
+
+    </script>
+</body>
+</html>
